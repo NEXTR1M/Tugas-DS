@@ -1,1 +1,182 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX 100
+
+struct Stack {
+    char data[MAX];
+    int top;
+};
+
+void start(Stack *stack) {
+    stack->top = -1;
+}
+
+int empty(Stack *stack) {
+    return stack->top == -1;
+}
+
+void push(Stack *stack, char c) {
+    stack->data[++stack->top] = c;
+}
+
+char pop(Stack *stack) {
+    return stack->data[stack->top--];
+}
+
+char peek(Stack *stack) {
+    return stack->data[stack->top];
+}
+
+int isOperator(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
+}
+
+int operatorRank(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    if (op == '^') return 3;
+    return 0;
+}
+
+void infixToPostfix(char *infix, char *postfix) {
+    Stack stack;
+    start(&stack);
+    int j = 0;
+
+    for (int i = 0; i < strlen(infix); i++) {
+        char c = infix[i];
+
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+            postfix[j++] = c;
+        else if (c == '(')
+            push(&stack, c);
+        else if (c == ')') {
+            while (!empty(&stack) && peek(&stack) != '(')
+                postfix[j++] = pop(&stack);
+            pop(&stack);
+        }
+        else if (isOperator(c)) {
+            while (!empty(&stack) && operatorRank(peek(&stack)) >= operatorRank(c))
+                postfix[j++] = pop(&stack);
+            push(&stack, c);
+        }
+    }
+    while (!empty(&stack))
+        postfix[j++] = pop(&stack);
+    postfix[j] = '\0';
+}
+
+void infixToPrefix(char *infix, char *prefix) {
+    char temp[MAX], rev[MAX];
+    int len = strlen(infix);
+
+    for (int i = 0; i < len; i++)
+        rev[i] = infix[len - i - 1];
+    rev[len] = '\0';
+
+    for (int i = 0; i < len; i++) {
+        if (rev[i] == '(')
+            rev[i] = ')';
+        else if (rev[i] == ')')
+            rev[i] = '(';
+    }
+
+    infixToPostfix(rev, temp);
+
+    len = strlen(temp);
+    for (int i = 0; i < len; i++)
+        prefix[i] = temp[len - i - 1];
+    prefix[len] = '\0';
+}
+
+void postfixToInfix(char *postfix, char *infix) {
+    char stack[MAX][MAX];
+    int stackIdx = -1;
+    char temp[2] = "";
+    char op1[MAX], op2[MAX], expr[MAX];
+
+    for (int i = 0; i < strlen(postfix); i++) {
+        char c = postfix[i];
+
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+            temp[0] = c;
+            strcpy(stack[++stackIdx], temp);
+        } else if (isOperator(c)) {
+            strcpy(op1, stack[stackIdx--]);
+            strcpy(op2, stack[stackIdx--]);
+            sprintf(expr, "(%s%c%s)", op2, c, op1);
+            strcpy(stack[++stackIdx], expr);
+        }
+    }
+    strcpy(infix, stack[stackIdx]);
+}
+
+void prefixToInfix(char *prefix, char *infix) {
+    char stack[MAX][MAX];
+    int stackIdx = -1;
+    char temp[2] = "";
+    char op1[MAX], op2[MAX], expr[MAX];
+    int len = strlen(prefix);
+
+    for (int i = len - 1; i >= 0; i--) {
+        char c = prefix[i];
+
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+            temp[0] = c;
+            strcpy(stack[++stackIdx], temp);
+        } else if (isOperator(c)) {
+            strcpy(op1, stack[stackIdx--]);
+            strcpy(op2, stack[stackIdx--]);
+            sprintf(expr, "(%s%c%s)", op1, c, op2);
+            strcpy(stack[++stackIdx], expr);
+        }
+    }
+    strcpy(infix, stack[stackIdx]);
+}
+
+void printMenu(char *infix) {
+    printf("Infix Awal: %s\n", infix);
+    printf("1. Infix ke Postfix\n");
+    printf("2. Postfix ke Infix\n");
+    printf("3. Infix ke Prefix\n");
+    printf("4. Prefix ke Infix\n");
+    printf("5. Keluar\n");
+}
+
+int main() {
+    int choice;
+    char infix[MAX] = "A+(B*C-(D/E^F)*G)*H";
+    char postfix[MAX], prefix[MAX];
+
+    do {
+        printMenu(infix);
+        printf("Masukkan pilihan: ");
+        scanf("%d", &choice);
+        getchar();
+
+        if (choice == 1) {
+            infixToPostfix(infix, postfix);
+            printf("Infix   : %s\n", infix);
+            printf("Postfix : %s\n", postfix);
+        } else if (choice == 2) {
+            strcpy(postfix, "ABC*DEF^/G*-H*+");
+            postfixToInfix(postfix, infix);
+            printf("Postfix : %s\n", postfix);
+            printf("Infix   : %s\n", infix);
+        } else if (choice == 3) {
+            infixToPrefix(infix, prefix);
+            printf("Infix   : %s\n", infix);
+            printf("Prefix  : %s\n", prefix);
+        } else if (choice == 4) {
+            strcpy(prefix, "+A*-*BC/^DEFGH");
+            prefixToInfix(prefix, infix);
+            printf("Prefix  : %s\n", prefix);
+            printf("Infix   : %s\n", infix);
+        } else if (choice != 5) {
+            printf("Pilihan tidak valid!\n");
+        }
+    } while (choice != 5);
+    return 0;
+}
 
