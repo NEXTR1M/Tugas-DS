@@ -92,7 +92,7 @@ void infixToPrefix(char *infix, char *prefix) {
 
 void postfixToInfix(char *postfix, char *infix) {
     char stack[MAX][MAX];
-    int stackIdx = -1;
+    int indeks = -1;
     char temp[2] = "";
     char op1[MAX], op2[MAX], expr[MAX];
 
@@ -101,20 +101,21 @@ void postfixToInfix(char *postfix, char *infix) {
 
         if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
             temp[0] = c;
-            strcpy(stack[++stackIdx], temp);
+            temp[1] = '\0';
+            strcpy(stack[++indeks], temp);
         } else if (isOperator(c)) {
-            strcpy(op1, stack[stackIdx--]);
-            strcpy(op2, stack[stackIdx--]);
-            sprintf(expr, "(%s%c%s)", op2, c, op1);
-            strcpy(stack[++stackIdx], expr);
+            strcpy(op1, stack[indeks--]);
+            strcpy(op2, stack[indeks--]);
+            sprintf(expr, "%s%c%s", op2, c, op1);
+            strcpy(stack[++indeks], expr);
         }
     }
-    strcpy(infix, stack[stackIdx]);
+    strcpy(infix, stack[indeks]);
 }
 
 void prefixToInfix(char *prefix, char *infix) {
     char stack[MAX][MAX];
-    int stackIdx = -1;
+    int indeks = -1;
     char temp[2] = "";
     char op1[MAX], op2[MAX], expr[MAX];
     int len = strlen(prefix);
@@ -124,15 +125,16 @@ void prefixToInfix(char *prefix, char *infix) {
 
         if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
             temp[0] = c;
-            strcpy(stack[++stackIdx], temp);
+            temp[1] = '\0';
+            strcpy(stack[++indeks], temp);
         } else if (isOperator(c)) {
-            strcpy(op1, stack[stackIdx--]);
-            strcpy(op2, stack[stackIdx--]);
-            sprintf(expr, "(%s%c%s)", op1, c, op2);
-            strcpy(stack[++stackIdx], expr);
+            strcpy(op1, stack[indeks--]);
+            strcpy(op2, stack[indeks--]);
+            sprintf(expr, "%s%c%s", op1, c, op2);
+            strcpy(stack[++indeks], expr);
         }
     }
-    strcpy(infix, stack[stackIdx]);
+    strcpy(infix, stack[indeks]);
 }
 
 void printMenu(char *infix) {
@@ -146,7 +148,7 @@ void printMenu(char *infix) {
 
 int main() {
     int choice;
-    char infix[MAX] = "A+(B*C-(D/E^F)*G)*H";
+    char infix[MAX] = "A+B*C-D/E^F*G*H";
     char postfix[MAX], prefix[MAX];
 
     do {
@@ -179,4 +181,5 @@ int main() {
     } while (choice != 5);
     return 0;
 }
+
 
